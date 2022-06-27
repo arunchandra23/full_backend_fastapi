@@ -19,10 +19,10 @@ def add_user(request:User_schema,db:SessionLocal=Depends(get_db)):#,current_user
     db.add(subs)
     db.commit()
     db.refresh(subs)
-    s=db.query(Subscription).filter(Subscription.end_timestamp==request.subscription_expires).first()
+    # s=db.query(Subscription).filter(Subscription.end_timestamp==request.subscription_expires).first()
     if not user:
         raise HTTPException(status.HTTP_406_NOT_ACCEPTABLE,detail="Failed to add user")
-    user.subscription.append(s)
+    user.subscription.append(subs)
     db.add(user)
     db.commit()
     db.refresh(user)
@@ -44,7 +44,18 @@ def add_genre(request:Genre_schema,db:SessionLocal=Depends(get_db)):
 def add_movie(request:Movie_schema,db:SessionLocal=Depends(get_db)):
     movie= Movie(title=request.title.lower(),description=request.description,language=request.language.lower(),release_date=request.release_date,director=request.director)
     genres=request.genres
-
+    languages=["telugu","hindi","english","tamil","kannada","marathi","urdu"]
+    k=0
+    req=request.language.split(",")
+    l=len(req)
+    for i in languages:
+        for j in req:
+            if i.lower()==j.lower():
+                k=k+1
+                break
+            
+    if k!=l:
+        raise HTTPException(status.HTTP_404_NOT_FOUND,detail="Please enter a valid language")
     for genre in genres:
         g=db.query(Genre).filter(Genre.genre_name==genre.lower()).first()
         if not g:
