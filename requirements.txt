@@ -40,7 +40,6 @@ pyparsing==3.0.9
 python-dateutil==2.8.2
 python-jose==3.3.0
 python-multipart==0.0.5
-pywin32==304
 pyzmq==23.1.0
 rsa==4.8
 six==1.16.0
