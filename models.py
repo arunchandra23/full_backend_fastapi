@@ -1,4 +1,8 @@
 from datetime import datetime
+
+from sqlalchemy.dialects.postgresql import UUID
+import uuid
+from traitlets import default
 from database import Base,engine,SessionLocal
 from sqlalchemy import Column, ForeignKey,String,DateTime,Integer,Table,Float
 from sqlalchemy.orm import relationship
@@ -11,13 +15,13 @@ from sqlalchemy.orm import relationship
 
 class Watched(Base):
     __tablename__="watched"
-    watch_id=Column(Integer,primary_key=True)
-    user_id=Column(Integer,ForeignKey('user.user_id'))
-    movie_id=Column(Integer,ForeignKey('movie.movie_id'))
+    watch_id=Column(UUID(as_uuid=True),primary_key=True,default=uuid.uuid4)
+    user_id=Column(UUID(as_uuid=True),ForeignKey('user.user_id'))
+    movie_id=Column(UUID(as_uuid=True),ForeignKey('movie.movie_id'))
 
 class User(Base):
     __tablename__="user"
-    user_id=Column(Integer,primary_key=True)
+    user_id=Column(UUID(as_uuid=True),default=uuid.uuid4,primary_key=True)
     name=Column(String,nullable=False)
     email=Column(String,nullable=False)
     password =Column(String,nullable=False)
@@ -29,17 +33,17 @@ class User(Base):
     
 class Subscription(Base):
     __tablename__='subscription'
-    id=Column(Integer,primary_key=True)
-    user_id=Column(Integer,ForeignKey('user.user_id'))
+    id=Column(UUID(as_uuid=True),default=uuid.uuid4,primary_key=True)
+    user_id=Column(UUID(as_uuid=True),ForeignKey('user.user_id'))
     start_timestamp = Column(DateTime(timezone=True),default=datetime.utcnow)
     end_timestamp = Column(DateTime(timezone=True),nullable=False)
 
 
 class Rating(Base):
     __tablename__="rating"
-    rating_id=Column(Integer,primary_key=True)
-    user_id= Column(Integer,ForeignKey("user.user_id"))
-    movie_id=Column(Integer,ForeignKey("movie.movie_id"))
+    rating_id=Column(UUID(as_uuid=True),default=uuid.uuid4,primary_key=True)
+    user_id= Column(UUID(as_uuid=True),ForeignKey("user.user_id"))
+    movie_id=Column(UUID(as_uuid=True),ForeignKey("movie.movie_id"))
     stars=Column(Float,nullable=False)
     comments=Column(String(3000))
     created_timestamp = Column(DateTime(timezone=True),default=datetime.utcnow,nullable=False)
@@ -50,15 +54,15 @@ class Rating(Base):
         
         
 junction_table = Table('movie_genre', Base.metadata,
-   Column('movie_id', Integer, ForeignKey('movie.movie_id')),
-   Column('genre_id', Integer, ForeignKey('genre.genre_id')),
+   Column('movie_id', UUID(as_uuid=True), ForeignKey('movie.movie_id')),
+   Column('genre_id', UUID(as_uuid=True), ForeignKey('genre.genre_id')),
 )
 
 
     
 class Movie(Base):
     __tablename__="movie"
-    movie_id=Column(Integer,primary_key=True)
+    movie_id=Column(UUID(as_uuid=True),default=uuid.uuid4,primary_key=True)
     title=Column(String,nullable=False)
     description =Column(String(300))      
     language=Column(String(30),nullable=False)
@@ -71,7 +75,7 @@ class Movie(Base):
         
 class Genre(Base):
     __tablename__="genre"
-    genre_id=Column(Integer,primary_key=True)
+    genre_id=Column(UUID(as_uuid=True),default=uuid.uuid4,primary_key=True)
     genre_name=Column(String(50),nullable=False)
     
     

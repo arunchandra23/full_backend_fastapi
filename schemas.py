@@ -1,8 +1,8 @@
 from datetime import datetime
 from turtle import title
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List,Union
-
+from uuid import uuid4, UUID
 
 class User_schema(BaseModel):
     name:str
@@ -13,7 +13,7 @@ class User_schema(BaseModel):
         orm_mode=True
         
 class Subscription(BaseModel):
-    user_id:int
+    user_id:UUID = Field(default_factory=uuid4)
     start_timestamp : datetime
     end_timestamp:datetime
     
@@ -52,7 +52,7 @@ class Movie_schema(BaseModel):
         
 
 class User_response_schema(BaseModel):
-    user_id:int
+    user_id:UUID = Field(default_factory=uuid4)    
     name:str
     email:str
     created_at:datetime
@@ -63,7 +63,7 @@ class User_response_schema(BaseModel):
         
         
 class Movie_response_schema(BaseModel):
-    movie_id:int
+    movie_id:UUID = Field(default_factory=uuid4)
     title:str
     description:str
     language:str
@@ -104,8 +104,8 @@ class Login(BaseModel):
         
 class Rating(BaseModel):
     created_timestamp:datetime
-    rating_id:int
-    user_id:int
+    rating_id:UUID = Field(default_factory=uuid4)
+    user_id:UUID = Field(default_factory=uuid4)    
     stars:float
     comments:str
     class Config:
@@ -113,7 +113,7 @@ class Rating(BaseModel):
 
 
 class GMovie_schema(BaseModel):
-    movie_id:int
+    movie_id:UUID = Field(default_factory=uuid4)
     title:str
     description:str
     language:str
@@ -126,8 +126,8 @@ class GMovie_schema(BaseModel):
         orm_mode=True  
 class Get_rating(BaseModel):
     created_timestamp:datetime
-    rating_id:int
-    movie_id:int
+    rating_id:UUID = Field(default_factory=uuid4)
+    movie_id:UUID = Field(default_factory=uuid4)
     stars:float
     comments:str
     movie=Movie_response_schema
@@ -137,7 +137,7 @@ class Get_rating(BaseModel):
           
 class Get_movie_response_schema(BaseModel):
     # name:str
-    movie_id:int
+    movie_id:UUID = Field(default_factory=uuid4)
     title:str
     description:str
     language:str
