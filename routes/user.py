@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter,Depends,HTTPException,status
 from database import SessionLocal,get_db
 from models import Rating, User,Movie,Genre,Watched,Subscription
-from schemas import Movie_response_schema, Test, Test2, Watch,Review_schema,Get_movie_response_schema,Get_rating
+from schemas import Movie_response_schema, Watch,Review_schema,Get_movie_response_schema,Get_rating
 from JWTtoken import get_current_user
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
@@ -11,18 +11,7 @@ from jose import jwt
 from fastapi.security import OAuth2PasswordRequestForm
 from hashing import Hash
 from JWTtoken import create_access_token
-import pickle,logging
-
-
-logger= logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-f_formatter=logging.Formatter('%(asctime)s:%(levelname)s:%(message)s')
-fh=logging.FileHandler("user.log")
-fh.setFormatter(f_formatter)
-logger.addHandler(fh)
-
-
-
+import pickle
 
 
 router=APIRouter(
@@ -44,12 +33,12 @@ def login(request:OAuth2PasswordRequestForm=Depends(),db:SessionLocal=Depends(ge
 
 
 
-@router.get("/get/movie/all")
+@router.get("/get/movie/all",response_model=List[Movie_response_schema])
 def view_all_movies(db:SessionLocal=Depends(get_db)):
     movies=db.query(Movie).all()
     return movies
 
-@router.get("/get/movie")
+@router.get("/get/movie",response_model=Get_movie_response_schema)
 def search_movie(title,db:SessionLocal=Depends(get_db),current_user: Watch = Depends(get_current_user)):
     movie=db.query(Movie).filter(Movie.title==title).first()
     if not movie:
@@ -151,11 +140,7 @@ def my_reviews(db:SessionLocal=Depends(get_db),current_user: Rating = Depends(ge
     user=jwt.decode(token=access_token,key="09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7")
     user=db.query(User).filter(User.email==user['sub']).first()
     
-    # rating=db.query(Rating).filter(Rating.user_id==user.user_id).all()
-    
-    #implementing join
-    result=db.query(Rating,Movie).join(Movie,Rating.movie_id==Movie.movie_id).filter(Rating.user_id==user.user_id).all() 
-        
+    rating=db.query(Rating).filter(Rating.user_id==user.user_id).all()
     # mov_names=[Rating()]
     # for i in rating:
         
@@ -164,7 +149,7 @@ def my_reviews(db:SessionLocal=Depends(get_db),current_user: Rating = Depends(ge
     
     if not user.ratings:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="No reviews, please write a review")
-    return result
+    return user.ratings
 
 
 @router.put("/review/edit")

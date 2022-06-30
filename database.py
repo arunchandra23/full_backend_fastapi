@@ -3,7 +3,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 import logging
 import re
-DB_URL = "postgresql://postgres:arun@localhost:5432/ott"
+DB_URL = "postgresql://postgres:arun@localhost:5432/ott_test"
+# DB_URL = "postgresql://postgres:arun@localhost:5432/ott"
 # DB_URL = "sqlite:///./data.db"
 engine = create_engine(DB_URL)
 
