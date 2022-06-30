@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter,Depends,HTTPException,status
 from database import SessionLocal,get_db
 from models import Rating, User,Movie,Genre,Watched,Subscription
-from schemas import Movie_response_schema, Watch,Review_schema,Get_movie_response_schema,Get_rating
+from schemas import Movie_response_schema, Test, Test2, Watch,Review_schema,Get_movie_response_schema,Get_rating
 from JWTtoken import get_current_user
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
@@ -11,7 +11,18 @@ from jose import jwt
 from fastapi.security import OAuth2PasswordRequestForm
 from hashing import Hash
 from JWTtoken import create_access_token
-import pickle
+import pickle,logging
+
+
+logger= logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+f_formatter=logging.Formatter('%(asctime)s:%(levelname)s:%(message)s')
+fh=logging.FileHandler("user.log")
+fh.setFormatter(f_formatter)
+logger.addHandler(fh)
+
+
+
 
 
 router=APIRouter(
@@ -140,7 +151,11 @@ def my_reviews(db:SessionLocal=Depends(get_db),current_user: Rating = Depends(ge
     user=jwt.decode(token=access_token,key="09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7")
     user=db.query(User).filter(User.email==user['sub']).first()
     
-    rating=db.query(Rating).filter(Rating.user_id==user.user_id).all()
+    # rating=db.query(Rating).filter(Rating.user_id==user.user_id).all()
+    
+    #implementing join
+    result=db.query(Rating,Movie).join(Movie,Rating.movie_id==Movie.movie_id).filter(Rating.user_id==user.user_id).all() 
+        
     # mov_names=[Rating()]
     # for i in rating:
         
@@ -149,7 +164,7 @@ def my_reviews(db:SessionLocal=Depends(get_db),current_user: Rating = Depends(ge
     
     if not user.ratings:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="No reviews, please write a review")
-    return user.ratings
+    return result
 
 
 @router.put("/review/edit")

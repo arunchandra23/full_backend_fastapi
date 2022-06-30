@@ -148,3 +148,16 @@ class Get_movie_response_schema(BaseModel):
     
     class Config:
         orm_mode=True
+        
+class Test(BaseModel):
+    Rating:Review_schema
+    Movie:Movie_response_schema
+    
+    class Config:
+        orm_mode=True
+        
+class Test2(BaseModel):
+    Rating:Test
+    
+    class Config:
+        orm_mode=True

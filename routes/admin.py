@@ -7,6 +7,7 @@ from JWTtoken import get_current_user
 import logging
 
 
+
 #logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -56,6 +57,10 @@ def add_user(request:User_schema,db:SessionLocal=Depends(get_db)):#,current_user
 
 @router.post("/genre")
 def add_genre(request:Genre_schema,db:SessionLocal=Depends(get_db)):
+    genre=db.query(Genre).filter(Genre.genre_name==request.genre_name).first()
+    if genre:
+        raise HTTPException(status.HTTP_406_NOT_ACCEPTABLE,detail=f"Genre with name: {request.genre_name} already exists")
+    
     genre= Genre(genre_name=request.genre_name.lower())
     if not genre:
         raise HTTPException(status.HTTP_406_NOT_ACCEPTABLE,detail="Failed to add genre")
