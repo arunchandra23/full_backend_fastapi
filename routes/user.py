@@ -33,7 +33,7 @@ def login(request:OAuth2PasswordRequestForm=Depends(),db:SessionLocal=Depends(ge
 
 
 
-@router.get("/get/movie/all")
+@router.get("/get/movie/all",response_model=List[Movie_response_schema])
 def view_all_movies(db:SessionLocal=Depends(get_db)):
     movies=db.query(Movie).all()
     return movies

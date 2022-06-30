@@ -1,12 +1,29 @@
 from fastapi import APIRouter,Depends,HTTPException,status
-from database import SessionLocal,get_db
+from database import SessionLocal,get_db,isValid
 from models import User,Movie,Genre,Subscription
 from schemas import Movie_schema, User_response_schema, User_schema,Genre_schema,Movie_response_schema
 from hashing import Hash
 from JWTtoken import get_current_user
+import logging
 
 
 
+#logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+#file logging
+f_formatter=logging.Formatter('%(asctime)s:%(levelname)s:%(message)s')
+fh = logging.FileHandler(filename='admin.txt')
+fh.setLevel(logging.DEBUG)
+fh.setFormatter(f_formatter)
+logger.addHandler(fh)
+#stream logging
+sh=logging.StreamHandler()
+sh.setLevel(logging.DEBUG)
+logger.addHandler(sh)
+
+
+# logging.basicConfig(filename="logs.txt",filemode="a",format='%(asctime)s:%(levelname)s:%(message)s',level=logging.DEBUG)
 router=APIRouter(
     tags=["Admin"],
     prefix="/add"
@@ -14,6 +31,14 @@ router=APIRouter(
 
 @router.post("/user",response_model=User_response_schema)
 def add_user(request:User_schema,db:SessionLocal=Depends(get_db)):#,current_user: User_schema = Depends(get_current_user)
+    
+    exist=db.query(User).filter(User.email==request.email).first()
+    if exist:
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE,detail="The user with this email already exist")
+    if not isValid(request.email):
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE,detail="Please enter a valid email address")
+    
+    
     user= User(name=request.name,email=request.email,password=Hash.hash(request.password))
     subs=Subscription(end_timestamp=request.subscription_expires)
     db.add(subs)
@@ -26,11 +51,16 @@ def add_user(request:User_schema,db:SessionLocal=Depends(get_db)):#,current_user
     db.add(user)
     db.commit()
     db.refresh(user)
+    logger.debug(f"ADD USER: created user {user.name}")
     return user
 
 
 @router.post("/genre")
 def add_genre(request:Genre_schema,db:SessionLocal=Depends(get_db)):
+    genre=db.query(Genre).filter(Genre.genre_name==request.genre_name).first()
+    if genre:
+        raise HTTPException(status.HTTP_406_NOT_ACCEPTABLE,detail=f"Genre with name: {request.genre_name} already exists")
+    
     genre= Genre(genre_name=request.genre_name.lower())
     if not genre:
         raise HTTPException(status.HTTP_406_NOT_ACCEPTABLE,detail="Failed to add genre")

@@ -1,8 +1,10 @@
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-
-DB_URL = "postgresql://bfrxegdlyokgoz:e7f5c214a58219673eec9b577c2e6288e659801817e55592d3a44f27be4ab422@ec2-3-222-74-92.compute-1.amazonaws.com:5432/d55vkls8p7vq7l"
+import logging
+import re
+DB_URL = "postgresql://postgres:arun@localhost:5432/ott_test"
+# DB_URL = "postgresql://postgres:arun@localhost:5432/ott"
 # DB_URL = "sqlite:///./data.db"
 engine = create_engine(DB_URL)
 
@@ -16,4 +18,12 @@ def get_db():
         yield db
     finally:
         db.close()
-        
+
+
+def isValid(email):
+    regex = re.compile(r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+')
+    if re.fullmatch(regex, email):
+        logging.warning("valid email")
+        return True
+    else:
+        return False
