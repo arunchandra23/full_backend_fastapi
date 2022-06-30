@@ -49,7 +49,7 @@ def view_all_movies(db:SessionLocal=Depends(get_db)):
     movies=db.query(Movie).all()
     return movies
 
-@router.get("/get/movie",response_model=Get_movie_response_schema)
+@router.get("/get/movie")
 def search_movie(title,db:SessionLocal=Depends(get_db),current_user: Watch = Depends(get_current_user)):
     movie=db.query(Movie).filter(Movie.title==title).first()
     if not movie:
