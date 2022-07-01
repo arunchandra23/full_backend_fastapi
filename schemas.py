@@ -22,13 +22,14 @@ class Subscription(BaseModel):
 
 class Review_schema(BaseModel):
     #Get the user-id of logged in user from the FastApi and add it to the table using add()
-    title:str
+    # title:str
     stars:float
     comments:str
+    created_timestamp:datetime
     
     class Config:
         orm_mode=True
-
+        
 
 class Genre_schema(BaseModel):
     genre_name:str
@@ -150,14 +151,9 @@ class Get_movie_response_schema(BaseModel):
         orm_mode=True
         
 class Test(BaseModel):
+    title:str
     Rating:Review_schema
-    Movie:Movie_response_schema
     
     class Config:
         orm_mode=True
         
-class Test2(BaseModel):
-    Rating:Test
-    
-    class Config:
-        orm_mode=True

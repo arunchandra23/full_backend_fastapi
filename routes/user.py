@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter,Depends,HTTPException,status
 from database import SessionLocal,get_db
 from models import Rating, User,Movie,Genre,Watched,Subscription
-from schemas import Movie_response_schema, Watch,Review_schema,Get_movie_response_schema,Get_rating
+from schemas import Movie_response_schema, Test, Watch,Review_schema,Get_movie_response_schema,Get_rating
 from JWTtoken import get_current_user
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
@@ -12,7 +12,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from hashing import Hash
 from JWTtoken import create_access_token
 import pickle
-
+############################################################################################
 
 router=APIRouter(
     tags=["User"],
@@ -33,7 +33,7 @@ def login(request:OAuth2PasswordRequestForm=Depends(),db:SessionLocal=Depends(ge
 
 
 
-@router.get("/get/movie/all",response_model=List[Movie_response_schema])
+@router.get("/get/movie/all",response_model=List[Get_movie_response_schema])
 def view_all_movies(db:SessionLocal=Depends(get_db)):
     movies=db.query(Movie).all()
     return movies
@@ -133,7 +133,7 @@ def review(request:Review_schema,db:SessionLocal=Depends(get_db),current_user: W
     return "submitted review sucessfully",review
 
 
-@router.get("/get/reviews")
+@router.get("/get/reviews",response_model=List[Test])
 def my_reviews(db:SessionLocal=Depends(get_db),current_user: Rating = Depends(get_current_user)):
     # getting current user
     access_token = pickle.load(open("variableStoringFile.dat", "rb"))
@@ -141,6 +141,7 @@ def my_reviews(db:SessionLocal=Depends(get_db),current_user: Rating = Depends(ge
     user=db.query(User).filter(User.email==user['sub']).first()
     
     rating=db.query(Rating).filter(Rating.user_id==user.user_id).all()
+    res=db.query(Movie.title,Rating).outerjoin(Rating,Movie.movie_id==Rating.movie_id).filter(Rating.user_id==user.user_id).all()
     # mov_names=[Rating()]
     # for i in rating:
         
@@ -149,7 +150,7 @@ def my_reviews(db:SessionLocal=Depends(get_db),current_user: Rating = Depends(ge
     
     if not user.ratings:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="No reviews, please write a review")
-    return user.ratings
+    return res#user.ratings
 
 
 @router.put("/review/edit")

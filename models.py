@@ -8,11 +8,6 @@ from sqlalchemy import Column, ForeignKey,String,DateTime,Integer,Table,Float
 from sqlalchemy.orm import relationship
 
 
-# junction_movies=Table("movies_watched",Base.metadata,
-#                     Column("user_id",Integer,ForeignKey('user.user_id')),
-#                     Column("movie_id",Integer,ForeignKey('movie.movie_id'))                      
-#                       )
-
 class Watched(Base):
     __tablename__="watched"
     watch_id=Column(UUID(as_uuid=True),primary_key=True,default=uuid.uuid4)
@@ -28,7 +23,6 @@ class User(Base):
     created_at=Column(DateTime,default=datetime.utcnow,nullable=False)
     ratings=relationship("Rating",backref="user_rating")
     subscription= relationship("Subscription", backref="user_sub")
-    # movies_watched= relationship("Movie",secondary=junction_movies,backref='user_watch')
     
     
 class Subscription(Base):
@@ -47,10 +41,6 @@ class Rating(Base):
     stars=Column(Float,nullable=False)
     comments=Column(String(3000))
     created_timestamp = Column(DateTime(timezone=True),default=datetime.utcnow,nullable=False)
-    # user_id_rel = relationship("User", foreign_keys=[user_id])
-    # movies_id_rel = relationship("Movie", foreign_keys=[movie_id])
-    # users=relationship("User",back_populates="ratings")
-    
         
         
 junction_table = Table('movie_genre', Base.metadata,
